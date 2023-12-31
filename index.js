@@ -88,18 +88,13 @@ function sendResponse(res, statusCode, data, success = true, message) {
     res.status(statusCode).json({
       status: statusCode,
       error: message,
-      data: {
-        success,
-        data,
-      },
+      success,
     });
   } else {
     res.status(statusCode).json({
       status: statusCode,
-      data: {
-        success,
-        data,
-      },
+      success,
+      data,
     });
   }
 }
