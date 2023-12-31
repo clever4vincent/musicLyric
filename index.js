@@ -4,10 +4,10 @@ const fs = require("fs");
 const os = require("os");
 const readline = require("readline");
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/songs");
-// mongoose.connect(
-//   "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.trwul3l.mongodb.net/songs?retryWrites=true&w=majority"
-// );
+// mongoose.connect("mongodb://localhost:27017/songs");
+mongoose.connect(
+  "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.trwul3l.mongodb.net/songs?retryWrites=true&w=majority"
+);
 
 const db = mongoose.connection;
 const Song = mongoose.model("Song", {
@@ -99,7 +99,7 @@ function sendResponse(res, statusCode, status, data, message) {
 
 const app = express();
 app.use(cors());
-const port = 3005;
+const port = 3000;
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
