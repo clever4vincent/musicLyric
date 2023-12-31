@@ -83,16 +83,23 @@ const insertSongDB = async () => {
     // db.close();
   });
 };
-function sendResponse(res, statusCode, status, data, message) {
+function sendResponse(res, statusCode, data, success = true, message) {
   if (statusCode >= 400) {
     res.status(statusCode).json({
-      status: status,
+      status: statusCode,
       error: message,
+      data: {
+        success,
+        data,
+      },
     });
   } else {
     res.status(statusCode).json({
-      status: status,
-      data: data,
+      status: statusCode,
+      data: {
+        success,
+        data,
+      },
     });
   }
 }
@@ -109,9 +116,9 @@ app.get("/findSong", async (req, res) => {
     const { singerName } = req.query;
     console.log(singerName);
     const songs = await findSong(singerName);
-    sendResponse(res, 200, "success", songs);
+    sendResponse(res, 200, songs);
   } catch (error) {
-    sendResponse(res, 500, "error", null, error.message);
+    sendResponse(res, 500, null, false, error.message);
   }
 });
 app.listen(port, () => {
