@@ -36,13 +36,9 @@ db.once("close", async function () {
 });
 
 const findSong = async (keyword) => {
-  const songs = await Song.find({ singer_name: keyword })
-    .sort({
-      song_time_public: 1,
-    })
-    .catch((err) => {
-      console.error("Failed to find document", err.message);
-    });
+  const songs = await Song.find({ singer_name: keyword }).catch((err) => {
+    console.error("Failed to find document", err.message);
+  });
   // db.close();
   const filteredSongs = songs.filter(
     (song) =>
