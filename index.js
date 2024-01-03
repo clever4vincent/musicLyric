@@ -1,10 +1,16 @@
 const express = require("express");
 const cors = require("cors");
+const axios = require("axios");
 const fs = require("fs");
 const os = require("os");
 const readline = require("readline");
 const mongoose = require("mongoose");
 // mongoose.connect("mongodb://localhost:27017/songs");
+const instance = axios.create({
+  timeout: 10000,
+  headers: { "Content-Type": "application/json;charset=UTF-8" },
+});
+
 mongoose.connect(
   "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.trwul3l.mongodb.net/songs?retryWrites=true&w=majority"
 );
@@ -36,9 +42,13 @@ db.once("close", async function () {
 });
 
 const findSong = async (keyword) => {
-  const songs = await Song.find({ singer_name: keyword }).catch((err) => {
-    console.error("Failed to find document", err.message);
-  });
+  const songs = await Song.find({ singer_name: keyword })
+    // .sort({
+    //   song_time_public: 1,
+    // })
+    .catch((err) => {
+      console.error("Failed to find document", err.message);
+    });
   // db.close();
   const filteredSongs = songs.filter(
     (song) =>
@@ -108,6 +118,18 @@ app.get("/findSong", async (req, res) => {
     console.log(singerName);
     const songs = await findSong(singerName);
     sendResponse(res, 200, songs);
+  } catch (error) {
+    sendResponse(res, 500, null, false, error.message);
+  }
+});
+app.get("/findMovie", async (req, res) => {
+  try {
+    const { movieName } = req.query;
+    console.log(movieName);
+    const response = await instance.get(
+      `http://42.192.79.2:8849/fantasy/movie/all/aHlseUBoeWx5LmNvbQ%3D%3D/${movieName}`
+    );
+    res.send(response.data);
   } catch (error) {
     sendResponse(res, 500, null, false, error.message);
   }
