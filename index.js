@@ -11,13 +11,20 @@ const instance = axios.create({
   timeout: 10000,
   headers: { "Content-Type": "application/json;charset=UTF-8" },
 });
+// "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.trwul3l.mongodb.net/songs?retryWrites=true&w=majority"
+// mongoose.connect(
+//   "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.fc1lnkn.mongodb.net/"
+// );
 
-mongoose.connect(
+const db = mongoose.createConnection(
   "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.trwul3l.mongodb.net/songs?retryWrites=true&w=majority"
 );
-
-const db = mongoose.connection;
-const Song = mongoose.model("Song", {
+const db2 = mongoose.createConnection(
+  "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.fc1lnkn.mongodb.net/accounts?retryWrites=true&w=majority"
+);
+// utxX4MUQfvuYdaLX
+// const db = mongoose.connection;
+const Song = db.model("Song", {
   singer_name: [String],
   song_name: String,
   subtitle: String,
@@ -33,12 +40,25 @@ const Song = mongoose.model("Song", {
   // hot_comments: String,
   lyric: String,
 });
+const Account = db2.model("Account", {
+  name: { type: String, unique: true },
+  account: mongoose.Schema.Types.Object,
+  condition: mongoose.Schema.Types.Object,
+});
 db.once("open", async function () {
   console.log("connected");
   // insertSongDB();
   // findSong("林俊杰");
 });
 db.once("close", async function () {
+  console.log("closed");
+});
+db2.once("open", async function () {
+  console.log("connected2");
+  // insertSongDB2();
+  // findSong("林俊杰");
+});
+db2.once("close", async function () {
   console.log("closed");
 });
 
@@ -88,6 +108,13 @@ const insertSongDB = async () => {
   // 文件读取完毕后关闭数据库连接
   rl.on("close", () => {
     // db.close();
+  });
+};
+const insertSongDB2 = async () => {
+  // 创建一个 readline.Interface 实例
+  let account = { name: "test", account: "test", condition: "test" };
+  new Account(account).save().catch((err) => {
+    console.error("Failed to insert document", err.message);
   });
 };
 function sendResponse(res, statusCode, data, success = true, message) {
@@ -140,28 +167,33 @@ app.get("/findMovie", async (req, res) => {
 });
 app.post("/saveAccount", async (req, res) => {
   try {
-    console.log(req.body);
-    const { condition, account } = req.body;
-    let data = JSON.stringify({ condition, account });
-    // console.log(data);
-    fs.writeFile("accountInfo.json", data, (err) => {
-      if (err) throw err;
-      console.log("Data written to file");
-    });
-    sendResponse(res, 200, "保存成功!");
+    // console.log(req.body);
+    const { name, condition, account } = req.body;
+    let data = { name, condition, account };
+    try {
+      await Account.findOneAndUpdate({ name }, data, {
+        upsert: true,
+      });
+      sendResponse(res, 200, "保存成功!");
+    } catch (err) {
+      console.error("Failed to insert or update document", err.message);
+      sendResponse(res, 500, null, false, err.message);
+    }
   } catch (error) {
     sendResponse(res, 500, null, false, error.message);
   }
 });
 app.post("/getAccount", async (req, res) => {
   try {
-    fs.readFile("accountInfo.json", "utf8", (err, data) => {
-      if (err) throw err;
-      console.log("Data read from file");
-      // 将数据按存储前的格式，读取condition和account
-      // let { condition, account } = JSON.parse(data);
-      sendResponse(res, 200, JSON.parse(data));
-    });
+    const { name } = req.body;
+    let data = { name };
+    try {
+      const { condition, account } = await Account.findOne(data);
+      sendResponse(res, 200, { condition, account });
+    } catch (err) {
+      console.error("Failed to insert or update document", err.message);
+      sendResponse(res, 500, null, false, err.message);
+    }
   } catch (error) {
     sendResponse(res, 500, null, false, error.message);
   }
