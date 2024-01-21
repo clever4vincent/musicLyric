@@ -5,6 +5,7 @@ const fs = require("fs");
 const os = require("os");
 const readline = require("readline");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 // mongoose.connect("mongodb://localhost:27017/songs");
 const instance = axios.create({
   timeout: 10000,
@@ -107,6 +108,9 @@ function sendResponse(res, statusCode, data, success = true, message) {
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+
 const port = 3000;
 
 app.get("/", (req, res) => {
@@ -130,6 +134,34 @@ app.get("/findMovie", async (req, res) => {
       `http://42.192.79.2:8849/fantasy/movie/all/aHlseUBoeWx5LmNvbQ%3D%3D/${movieName}`
     );
     res.send(response.data);
+  } catch (error) {
+    sendResponse(res, 500, null, false, error.message);
+  }
+});
+app.post("/saveAccount", async (req, res) => {
+  try {
+    console.log(req.body);
+    const { condition, account } = req.body;
+    let data = JSON.stringify({ condition, account });
+    // console.log(data);
+    fs.writeFile("accountInfo.json", data, (err) => {
+      if (err) throw err;
+      console.log("Data written to file");
+    });
+    sendResponse(res, 200, "保存成功!");
+  } catch (error) {
+    sendResponse(res, 500, null, false, error.message);
+  }
+});
+app.post("/getAccount", async (req, res) => {
+  try {
+    fs.readFile("accountInfo.json", "utf8", (err, data) => {
+      if (err) throw err;
+      console.log("Data read from file");
+      // 将数据按存储前的格式，读取condition和account
+      // let { condition, account } = JSON.parse(data);
+      sendResponse(res, 200, JSON.parse(data));
+    });
   } catch (error) {
     sendResponse(res, 500, null, false, error.message);
   }
