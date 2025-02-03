@@ -158,7 +158,7 @@ app.get("/findMovie", async (req, res) => {
     const { movieName } = req.query;
     console.log(movieName);
     const response = await instance.get(
-      `http://42.192.79.2:8849/fantasy/movie/all/aHlseUBoeWx5LmNvbQ%3D%3D/${movieName}`
+      `http://101.43.155.108:8849/fantasy/movie/all/aHlseUBoeWx5LmNvbQ%3D%3D/${movieName}`
     );
     res.send(response.data);
   } catch (error) {
