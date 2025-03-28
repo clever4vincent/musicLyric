@@ -16,12 +16,15 @@ const instance = axios.create({
 //   "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.fc1lnkn.mongodb.net/"
 // );
 
-const db = mongoose.createConnection(
-  "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.trwul3l.mongodb.net/songs?retryWrites=true&w=majority"
-);
-const db2 = mongoose.createConnection(
-  "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.fc1lnkn.mongodb.net/accounts?retryWrites=true&w=majority"
-);
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.trwul3l.mongodb.net/songs?retryWrites=true&w=majority";
+const MONGODB_URI_2 =
+  process.env.MONGODB_URI_2 ||
+  "mongodb+srv://user:wAFat3rPZ2Kvv36@cluster0.fc1lnkn.mongodb.net/accounts?retryWrites=true&w=majority";
+
+const db = mongoose.createConnection(MONGODB_URI);
+const db2 = mongoose.createConnection(MONGODB_URI_2);
 // utxX4MUQfvuYdaLX
 // const db = mongoose.connection;
 const Song = db.model("Song", {
@@ -138,7 +141,7 @@ app.use(cors());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
